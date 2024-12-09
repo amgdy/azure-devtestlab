@@ -46,6 +46,11 @@
     },
     "resources": [
         {
+            "copy": {
+                "name": "openaiDeployments",
+                "count": 3,
+                "batchSize": 1
+            },
             "type": "Microsoft.CognitiveServices/accounts",
             "apiVersion": "2024-10-01",
             "name": "[variables('name')]",
