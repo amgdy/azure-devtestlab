@@ -1,0 +1,6 @@
+{
+    "itemDisplayName": "Azure OpenAI",
+    "description": "This template creates an Azure OpenAI Service",
+    "githubUsername": "Ahmed Magdy",
+    "summary": "Deploys an Azure Azure OpenAI as an environment in a DevTest Lab."
+}

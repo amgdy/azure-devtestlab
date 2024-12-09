@@ -1,0 +1,128 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "region": {
+            "type": "string",
+            "defaultValue": "swedencentral",
+            "allowedValues": [
+                "eastus2",
+                "francecentral",
+                "swedencentral",
+                "uksouth",
+                "westus3",
+                "japaneast"
+            ],
+            "metadata": {
+                "description": "Specify the Azure region where the Azure OpenAI Service will be deployed. This field determines the geographic location of the deployed resources. Choose from the allowed values to ensure the service is available in the selected region."
+            }
+        },
+        "deployGPT4o": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Set to true to deploy the GPT-4o model."
+            }
+        },
+        "deployTextEmbedding3Large": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Set to true to deploy the Text Embedding 3 Large model."
+            }
+        },
+        "deployTextEmbeddingAda002": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Set to true to deploy the Text Embedding Ada-002 model."
+            }
+        }
+    },
+    "variables": {
+        "resourceNamePrefix": "[take(uniqueString(resourceGroup().id), 4)]",
+        "name": "[toLower(concat('oai-', variables('resourceNamePrefix'), '-dev-', parameters('region'), '-01'))]",
+        "location": "[parameters('region')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "apiVersion": "2024-10-01",
+            "name": "[variables('name')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "OpenAI",
+            "properties": {}
+        },
+        {
+            "condition": "[parameters('deployGPT4o')]",
+            "type": "Microsoft.CognitiveServices/accounts/deployments",
+            "apiVersion": "2024-10-01",
+            "name": "[concat(variables('name'), '/gpt-4o')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', variables('name'))]"
+            ],
+            "sku": {
+                "name": "GlobalStandard",
+                "capacity": 30
+            },
+            "properties": {
+                "model": {
+                    "format": "OpenAI",
+                    "name": "gpt-4o",
+                    "version": "2024-05-13"
+                },
+                "versionUpgradeOption": "OnceCurrentVersionExpired",
+                "currentCapacity": 30,
+                "raiPolicyName": "Microsoft.DefaultV2"
+            }
+        },
+        {
+            "condition": "[parameters('deployTextEmbedding3Large')]",
+            "type": "Microsoft.CognitiveServices/accounts/deployments",
+            "apiVersion": "2024-10-01",
+            "name": "[concat(variables('name'), '/text-embedding-3-large')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', variables('name'))]"
+            ],
+            "sku": {
+                "name": "Standard",
+                "capacity": 30
+            },
+            "properties": {
+                "model": {
+                    "format": "OpenAI",
+                    "name": "text-embedding-3-large",
+                    "version": "1"
+                },
+                "currentCapacity": 30,
+                "raiPolicyName": "Microsoft.DefaultV2"
+            }
+        },
+        {
+            "condition": "[parameters('deployTextEmbeddingAda002')]",
+            "type": "Microsoft.CognitiveServices/accounts/deployments",
+            "apiVersion": "2024-10-01",
+            "name": "[concat(variables('name'), '/text-embedding-ada-002')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', variables('name'))]"
+            ],
+            "sku": {
+                "name": "Standard",
+                "capacity": 30
+            },
+            "properties": {
+                "model": {
+                    "format": "OpenAI",
+                    "name": "text-embedding-ada-002",
+                    "version": "2"
+                },
+                "currentCapacity": 30,
+                "raiPolicyName": "Microsoft.DefaultV2"
+            }
+        }
+    ]
+}
